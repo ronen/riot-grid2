@@ -2,12 +2,12 @@ grid2
   .gridwrap(style="height:{opts.height}px")
   
     //- main body
-    .gridbody#mainbody(style="left:{fixedLeftWidth}px;top:{rowHeight}px;bottom:0px")
+    .gridbody(style="left:{fixedLeftWidth}px;top:{rowHeight}px;bottom:0px")
       .fixedLeft(style="transform:translate3d({0-overlay.scrollLeft}px,{0-overlay.scrollTop}px,0px);backface-visibility: hidden;width:{fixedLeftWidth}px;bottom:1px;z-index:2;")
         gridcelltag.cell(tag="{cell.tag}",value="{cell.text}",cell="{cell}",each="{cell in visCells.main}",class="{active:cell.active}",onclick="{handleClick}",no-reorder,style="position: absolute;left:{cell.left}px;top:{cell.top}px;width:{cell.width}px;height:{rowHeight}px;") {cell.text}
         
     //- fixed top
-    .gridbody#header(style="height:{rowHeight}px;margin-right:15px")
+    .gridbody(ref="header",style="height:{rowHeight}px;margin-right:15px")
       .header(style="top:0px;left:0px;width:{scrollWidth}px;height:{rowHeight}px")
         .headercell(each="{headers.main}",no-reorder,style="transform:translate3d({left}px,0px,0px); backface-visibility: hidden;width:{width}px;height:{rowHeight}px;") {text}
     
@@ -19,7 +19,7 @@ grid2
         gridcelltag.cell(tag="{cell.tag}",value="{cell.text}",cell="{cell}",each="{cell in visCells.fixed}",class="{active:cell.active}",onclick="{handleClick}",no-reorder,style="position: absolute;left:{cell.left}px;top:{cell.top}px;width:{cell.width}px;height:{rowHeight}px;") {cell.text}
   
     //- scroll area
-    .gridbody#overlay(onscroll='{scrolling}',style="overflow:auto;left:0px;top:{rowHeight}px;bottom:0px;")
+    .gridbody(ref="overlay",onscroll='{scrolling}',style="overflow:auto;left:0px;top:{rowHeight}px;bottom:0px;")
       .scrollArea(style="background:rgba(0,0,0,0.005);width:{scrollWidth}px;height:{scrollHeight-rowHeight}px;")
 
   style(type="text/stylus"). 
@@ -79,6 +79,7 @@ grid2
       @activeRows = []
       @rowHeight = +opts.rowheight || 40
       @gridbody = @root.querySelectorAll(".gridbody")
+      @overlay = @refs.overlay
 
       @update()
       @overlay.addEventListener('click',@pushThroughClick)
@@ -180,7 +181,7 @@ grid2
       
     @scrolling = (e)=>
       e.preventUpdate = true
-      @header.scrollLeft = @overlay.scrollLeft
+      @refs.header.scrollLeft = @overlay.scrollLeft
       @update()
             
     calcArea = (gridbody)->

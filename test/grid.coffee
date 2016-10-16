@@ -52,7 +52,7 @@ describe 'grid2',->
      expect(document.querySelectorAll('.cell').length).to.be.gt((gridheight/40)*3)
 
   it "should render only enough rows after scrolling",->
-    document.querySelector('#overlay').scrollTop = 1000
+    document.querySelector('[ref="overlay"]').scrollTop = 1000
     expect(document.querySelectorAll('.cell').length).to.be.lt((gridheight/40)*4)
     expect(document.querySelectorAll('.cell').length).to.be.gt((gridheight/40)*3)
    
@@ -105,7 +105,7 @@ describe 'grid2',->
     #e.initMouseEvent(type, canBubble, cancelable, view, detail, screenX, screenY, clientX, clientY)...
     if document.createEvent
       e.initMouseEvent('click', true, true, window, 1, 100, 50, 100, 50)
-    simulant.fire(document.querySelector('#overlay'),e)
+    simulant.fire(document.querySelector('[ref="overlay"]'),e)
     expect(spyclick.calledOnce).to.be.true
     expect(spyclick.args[0][0][0]).to.eql(griddata[0])
 
