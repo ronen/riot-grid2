@@ -73,6 +73,11 @@ grid2
       
   script(type='text/coffee').
     
+    # dummy values for initial tag construction, until refs are defined and content is computed
+    @overlay = { scrollLeft: 0, scrollTop:0 }
+    @visCells = { main: [] }
+    @headers = { fixed: [], main: [] }
+
     @on 'mount',->
       @visCells = null
       @activeCells = []
