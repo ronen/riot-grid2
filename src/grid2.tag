@@ -78,7 +78,7 @@ grid2
     @visCells = { main: [] }
     @headers = { fixed: [], main: [] }
 
-    @on 'mount',->
+    @on 'mount',=>
       @visCells = null
       @activeCells = []
       @activeRows = []
@@ -88,11 +88,11 @@ grid2
       @overlay.addEventListener('click',@pushThroughClick)
       @overlay.addEventListener('dlbclick',@pushThroughClick)
       
-    @on 'unmount',->
+    @on 'unmount',=>
       @overlay.removeEventListener('click',@pushThroughClick)
       @overlay.removeEventListener('dlbclick',@pushThroughClick)
 
-    @on 'update',->
+    @on 'update',=>
       return if !@gridbody || !opts.data || !opts.columns
       if opts.columns && opts.data && (@columns != opts.columns || @data != opts.data)
         @data = opts.data
