@@ -85,8 +85,6 @@ grid2
       @rowHeight = +opts.rowheight || 40
       @gridbody = @root.querySelectorAll(".gridbody")
       @overlay = @refs.overlay
-
-      @update()
       @overlay.addEventListener('click',@pushThroughClick)
       @overlay.addEventListener('dlbclick',@pushThroughClick)
       
