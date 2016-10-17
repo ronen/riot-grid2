@@ -1,28 +1,28 @@
 grid2
   .gridwrap(style="height:{opts.height}px")
-  
+
     //- main body
     .gridbody(style="left:{fixedLeftWidth}px;top:{rowHeight}px;bottom:0px")
       .fixedLeft(style="transform:translate3d({0-overlay.scrollLeft}px,{0-overlay.scrollTop}px,0px);backface-visibility: hidden;width:{fixedLeftWidth}px;bottom:1px;z-index:2;")
         gridcelltag.cell(tag="{cell.tag}",value="{cell.text}",cell="{cell}",each="{cell in visCells.main}",class="{active:cell.active}",onclick="{parent.handleClick}",no-reorder,style="position: absolute;left:{cell.left}px;top:{cell.top}px;width:{cell.width}px;height:{rowHeight}px;") {cell.text}
-        
+
     //- fixed top
     .gridbody(ref="header",style="height:{rowHeight}px;margin-right:15px")
       .header(style="top:0px;left:0px;width:{scrollWidth}px;height:{rowHeight}px")
         .headercell(each="{headers.main}",no-reorder,style="transform:translate3d({left}px,0px,0px); backface-visibility: hidden;width:{width}px;height:{rowHeight}px;") {text}
-    
+
     //- fixed left
     .gridbody(style="width:{fixedLeftWidth}px;height:{opts.height-2}px")
       .fixedLeft(style="transform:translate3d(0px,{0-overlay.scrollTop}px,0px);backface-visibility: hidden;width:{fixedLeftWidth}px;bottom:1px;z-index:2;")
         .header(style="top:{overlay.scrollTop}px;left:0px;width:{fixedLeftWidth}px;height:{rowHeight}px")
           .headercell(each="{headers.fixed}",style="top:0px;left:{left}px;width:{width}px;height:{rowHeight}px;") {text}
         gridcelltag.cell(tag="{cell.tag}",value="{cell.text}",cell="{cell}",each="{cell in visCells.fixed}",class="{active:cell.active}",onclick="{parent.handleClick}",no-reorder,style="position: absolute;left:{cell.left}px;top:{cell.top}px;width:{cell.width}px;height:{rowHeight}px;") {cell.text}
-  
+
     //- scroll area
-    .gridbody(ref="overlay",onscroll='{scrolling}',style="overflow:auto;left:0px;top:{rowHeight}px;bottom:0px;")
+    .gridbody.overlay(ref="overlay",onscroll='{scrolling}',style="overflow:auto;left:0px;top:{rowHeight}px;bottom:0px;")
       .scrollArea(style="background:rgba(0,0,0,0.005);width:{scrollWidth}px;height:{scrollHeight-rowHeight}px;")
 
-  style(type="text/stylus"). 
+  style(type="text/stylus").
     grid2
       display block
       -webkit-font-smoothing: antialiased
@@ -35,7 +35,7 @@ grid2
         border 1px solid #ccc
         font-family sans-serif
         font-size:14px
-      
+
       .gridbody
         position absolute
         overflow:hidden
@@ -45,7 +45,7 @@ grid2
         bottom 0
         transform: translateZ(0)
         backface-visibility hidden
-      
+
       .fixedLeft
         position absolute
         top 0
@@ -61,18 +61,17 @@ grid2
         border 1px solid #eee
         border-width 0 1px 1px 0
         cursor pointer
-        
+
       .cell.active
         background #eee
-        
+
       .header
         position absolute
         z-index 1
         overflow hidden
         transform: translateZ(0)
-      
+
   script(type='text/coffee').
-    
     # dummy values for initial tag construction, until refs are defined and content is computed
     @overlay = { scrollLeft: 0, scrollTop:0 }
     @visCells = { main: [] }
@@ -87,7 +86,7 @@ grid2
       @overlay = @refs.overlay
       @overlay.addEventListener('click',@pushThroughClick)
       @overlay.addEventListener('dlbclick',@pushThroughClick)
-      
+
     @on 'unmount',=>
       @overlay.removeEventListener('click',@pushThroughClick)
       @overlay.removeEventListener('dlbclick',@pushThroughClick)
@@ -108,30 +107,30 @@ grid2
     @handleClick = (e)=>
       @deselect() if !e.metaKey
       if e.metaKey then @toggleRow(e.item.cell.ridx) else @selectRow(e.item.cell.ridx)
-    
+
     @toggleRow = (ridx)=>
       if @activeRows.indexOf(ridx)>-1 then  @deselectRow(ridx) else @selectRow(ridx)
-       
+
     @deselectRow = (ridx)=>
       @activeRows.splice(@activeRows.indexOf(ridx),1)
-      @activeCells.forEach (cell)-> if cell.ridx == ridx then cell.active = false 
-    
+      @activeCells.forEach (cell)-> if cell.ridx == ridx then cell.active = false
+
     @selectRow = (ridx)=>
       @activeRows.push ridx
       if opts.click then opts.click @activeRows.map (idx)-> opts.data[idx]
       for cell in @rows[ridx].data
         @activeCells.push cell
         cell.active = true
-    
+
     @deselect = =>
       @activeCells.forEach (cell)-> cell.active = false
       @activeCells.length = 0
       @activeRows.length = 0
-    
+
     @pushThroughClick = (e)=>
       try
         event = new MouseEvent(e.type, e)
-      catch 
+      catch
         event = document.createEvent('MouseEvents')
         event.initMouseEvent(e.type, e)
       e.preventDefault()
@@ -140,7 +139,7 @@ grid2
       elem.dispatchEvent(event)
       @overlay.style.display = "block"
       @update()
-     
+
     calcPos= => # work out co-ordinates of all cells
       left = 0
       top = 0
@@ -181,18 +180,18 @@ grid2
       @scrollWidth = left
       @scrollHeight = top+@rowHeight
       @update()
-      
+
     @scrolling = (e)=>
       e.preventUpdate = true
       @refs.header.scrollLeft = @overlay.scrollLeft
       @update()
-            
+
     calcArea = (gridbody)->
       top:gridbody.scrollTop
       left:gridbody.scrollLeft
       right:gridbody.scrollLeft+gridbody.offsetWidth
       bottom:gridbody.scrollTop+gridbody.offsetHeight
-            
+
     calcVisible=(rows,gridbody,rowHeight)->
       r1 = calcArea(gridbody)
       first = Math.max(Math.floor(r1.top / rowHeight),0)
@@ -207,9 +206,9 @@ grid2
           else if !(r2.left > r1.right || r2.right < r1.left)
             visible.push r2
           break if r2.left > r1.right
-          
+
       return {main:visible,fixed:visiblefixed}
-    
+
     reCalc=(visCells,rows,gridbody,rowHeight)->
       newcells = calcVisible(rows,gridbody,rowHeight)
       area = calcArea(gridbody)
@@ -217,7 +216,7 @@ grid2
       visCells.main = reUse(visCells.main,newcells.main,area)
       visCells.fixed = reUse(visCells.fixed,newcells.fixed,area)
       return visCells
-      
+
     reUse = (visible,newcells,area)->
       unused = {}
       viskeys = []
@@ -229,7 +228,7 @@ grid2
           unused[tag].push idx
         else
         # if cell is in visible areaa keep on viskeys
-          viskeys.push cell.key 
+          viskeys.push cell.key
       for show in newcells
         if viskeys.indexOf(show.key) == -1 #if new cell us not on viskeys, try and reuse a tag
           tag = show.tag || "notag"
@@ -237,10 +236,10 @@ grid2
       return visible
 
 
-gridcelltag 
+gridcelltag
   div(riot-tag="{opts.tag}")
     <yield />
-    
+
   script(type="text/coffee").
     # copy of riot-subtag
     @prevtag = null
