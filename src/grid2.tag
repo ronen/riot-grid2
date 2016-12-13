@@ -19,8 +19,11 @@ grid2
         gridcelltag.cell(tag="{cell.tag}",class="{cell.classes()}",no-reorder,data="{parent.opts.data}",val="{cell.text}",cell="{cell}",each="{cell in visCells.fixed}",onclick="{parent.handleClick}",riot-style="position: absolute;left:{cell.left}px;top:{cell.top}px;width:{cell.width}px;height:{parent.rowHeight}px;") {cell.text}
   
     //- scroll area
-    .gridbody(ref="overlay",onscroll='{scrolling}',riot-style="overflow:auto;left:0px;top:{rowHeight}px;bottom:0px;-webkit-overflow-scrolling: touch;")
+    .gridbody(ref="voverlay",onscroll='{vscrolling}',riot-style="overflow-y:auto;left:0px;top:{rowHeight}px;bottom:0px;-webkit-overflow-scrolling: touch;")
       .scrollArea(riot-style="background:rgba(0,0,0,0.005);width:{scrollWidth}px;height:{scrollHeight-rowHeight}px;")
+    //- scroll area
+    .gridbody(ref="overlay",onscroll='{scrolling}',riot-style="overflow:auto;left:{fixedLeft.width}px;top:{rowHeight}px;bottom:0px;-webkit-overflow-scrolling: touch;")
+      .scrollArea(riot-style="background:rgba(0,0,0,0.005);width:{scrollWidth-fixedLeft.width}px;height:{scrollHeight-rowHeight}px;")
 
   style(type="text/stylus"). 
     grid2
@@ -85,15 +88,19 @@ grid2
     @on 'mount',->
       @rowHeight = +opts.rowheight || 40
       @gridbody = @root.querySelectorAll(".gridbody")
-      @pushevents.forEach (eventname)=> @refs.overlay.addEventListener(eventname,@pushThroughEvent)
+      @pushevents.forEach (eventname)=>
+        @refs.voverlay.addEventListener(eventname,@pushThroughEvent)
+        @refs.overlay.addEventListener(eventname,@pushThroughEvent)
       @update()
       
     @on 'before-unmount',->
-      @pushevents.forEach (eventname)=> @refs.overlay.removeEventListener(eventname,@pushThroughEvent)
+      @pushevents.forEach (eventname)=>
+        @refs.voverlay.removeEventListener(eventname,@pushThroughEvent)
+        @refs.overlay.removeEventListener(eventname,@pushThroughEvent)
  
     @on 'update',->
       return if !@gridbody || !opts.data || !opts.columns
-      if @refs.overlay
+      if @refs.voverlay
         @fixedLeft.left = 0 - @refs.overlay.scrollLeft
         @fixedLeft.top = 0 - @refs.overlay.scrollTop
       if opts.columns && opts.data && (@columns != opts.columns || @data != opts.data)
@@ -137,17 +144,20 @@ grid2
     @pushThroughEvent= (e)=>
       e.stopPropagation()
       e.preventUpdate = true
-      top = @refs.overlay.scrollTop #fix ie scrolling issue during click
+      top = @refs.voverlay.scrollTop #fix ie scrolling issue during click
       try
         event = new MouseEvent(e.type, e)
       catch 
         event = document.createEvent('MouseEvents')
         event.initMouseEvent(e.type, true,true,window,0,e.screenX,e.screenY,e.clientX,e.clientY,e.ctrlKey,e.altKey,e.shiftKey,e.metaKey,e.button,e.target)
       e.preventDefault()
+      @refs.voverlay.style.display = "none"
       @refs.overlay.style.display = "none"
       elem = document.elementFromPoint(e.pageX,e.pageY)
       elem?.dispatchEvent(event)
+      @refs.voverlay.style.display = "block"
       @refs.overlay.style.display = "block"
+      @refs.voverlay.scrollTop = top
       @refs.overlay.scrollTop = top
      
     calcPos= => # work out co-ordinates of all cells
@@ -196,7 +206,13 @@ grid2
       
     @scrolling = (e)=>
       e.preventUpdate = true
+      @refs.voverlay.scrollTop = @refs.overlay.scrollTop
       @refs.header.scrollLeft = @refs.overlay.scrollLeft
+      @update()
+
+    @vscrolling = (e)=>
+      e.preventUpdate = true
+      @refs.overlay.scrollTop = @refs.voverlay.scrollTop
       @update()
 
     calcArea = (gridbody)->
